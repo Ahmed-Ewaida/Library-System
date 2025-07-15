@@ -1,0 +1,263 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../Core/custom_appBar.dart';
+import '../../../../Core/Models/Book.dart';
+import '../../../../Core/widget/custom_snackbar.dart';
+import '../../../../local.dart';
+import '../../../Borrow_Screens/Screens/Borrowing_Info.dart';
+import '../../data/model/all_books_model.dart';
+import '../../manager/book_request_cubit/book_request_cubit.dart';
+import '../../manager/book_request_cubit/book_request_state.dart';
+
+class BookDetailsScreen extends StatelessWidget {
+  final Book book;
+  final Books books;
+
+  BookDetailsScreen({super.key, Book? book, required this.books})
+      : book = book ??
+      Book(
+        title: 'c++',
+        author: 'jone',
+        department: 'is',
+        location: 'دولاب 1',
+        number: 9,
+        status: true,
+        imageUrl: 'assets/fluent-emoji-flat_blue-book (1).png',
+        rating: 4,
+      );
+
+  static String id = "/BookDetailsScreen";
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<BookRequestCubit>(
+      create: (context) => BookRequestCubit(),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: const CustomAppBar(),
+        body: Column(
+          children: [
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.chevron_left, color: Colors.black),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+            Center(
+              child: Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image.asset(
+                      books.image ??
+                          "https://media.istockphoto.com/id/1055079680/vector/black-linear-photo-camera-like-no-image-available.jpg?s=612x612&w=0&k=20&c=P1DebpeMIAtXj_ZbVsKVvg-duuL0v9DlrOZUvPG6UJk=",
+                      width: 150,
+                      height: 150,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: 90,
+                        height: 120,
+                        color: Colors.grey[200],
+                        child: Image.network(
+                          "https://media.istockphoto.com/id/1055079680/vector/black-linear-photo-camera-like-no-image-available.jpg?s=612x612&w=0&k=20&c=P1DebpeMIAtXj_ZbVsKVvg-duuL0v9DlrOZUvPG6UJk=",
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'اسم الكتاب: ${books.bookName ?? "غير محدد"}',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  Text(
+                    'المؤلف: ${books.author ?? "غير محدد"}',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  Text(
+                    'القسم: ${books.department ?? "غير محدد"}',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  Text(
+                    'مكان الكتاب: ${book.location}',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  Text(
+                    'رقم الكتاب: ${book.number}',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  Text(
+                    'حالة الكتاب: ${(books.status ?? "") == "available" ? "متوفر" : "غير متوفر"}',
+                    style: TextStyle(
+                      color: (books.status ?? "") == "available"
+                          ? Colors.green
+                          : Colors.red,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(5, (index) {
+                      int filledStars = (books.averageRating ?? 0).floor();
+                      return Icon(
+                        Icons.star,
+                        size: 18,
+                        color: index < filledStars
+                            ? Colors.amber
+                            : Colors.grey[300],
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(25.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        print(books.bookId);
+                        if (books.bookId != null) {
+                          context.push(
+                            BorrowRequestPage.id,
+                            extra: books.bookId,
+                          );
+                        } else {
+                          customSnackBar(
+                            context,
+                            "معرّف الكتاب غير متوفر!",
+                            Colors.red,
+                            Icons.error,
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.all(5),
+                        backgroundColor: const Color(0XFF0C8CE9),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'استعارة الكتاب',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: BlocConsumer<BookRequestCubit, BookRequestState>(
+                      listener: (context, state) {
+                        if (state is BookRequestSuccess) {
+                          customSnackBar(
+                            context,
+                            state.message,
+                            Colors.green,
+                            Icons.check_circle_outline,
+                          );
+                        } else if (state is BookRequestError) {
+                          customSnackBar(
+                            context,
+                            state.message,
+                            Colors.red,
+                            Icons.error_outline_rounded,
+                          );
+                        }
+                      },
+                      builder: (context, state) {
+                        return ElevatedButton(
+                          onPressed: () {
+                            if (books.bookId != null) {
+                              BlocProvider.of<BookRequestCubit>(
+                                context,
+                              ).requestBook(
+                                bookId: books.bookId!,
+                                type: "reading",
+                                dueDate: "2025-12-31",
+                              );
+                            } else if (books.bookId == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("معرف الكتاب غير متوفر."),
+                                ),
+                              );
+                            } else {
+                              customSnackBar(
+                                context,
+                                "الكتاب غير متوفر",
+                                Colors.red,
+                                Icons.error_outline_rounded,
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.all(5),
+                            backgroundColor: const Color(0XFF0C8CE9),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          child: Center(
+                            child: state is BookRequestLoading
+                                ? const CircularProgressIndicator(
+                              color: Colors.cyan,
+                            )
+                                : const Text(
+                              'قراءة الكتاب',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

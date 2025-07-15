@@ -1,0 +1,68 @@
+import 'package:flutter/material.dart';
+import 'package:like_button/like_button.dart';
+
+class BookReadButton extends StatelessWidget {
+  final bool isBookSelected;
+
+  const BookReadButton({super.key, this.isBookSelected = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return LikeButton(
+      isLiked: isBookSelected,
+      circleColor: const CircleColor(
+        start: Color(0xffa0c4ff),
+        end: Color(0xff0077b6),
+      ),
+      bubblesColor: const BubblesColor(
+        dotPrimaryColor: Colors.blue,
+        dotSecondaryColor: Colors.white,
+      ),
+      likeBuilder: (isLiked) {
+        return Icon(
+          Icons.menu_book,
+          color: isLiked ? Colors.blue : Colors.grey.withOpacity(0.5),
+          size: 30,
+        );
+      },
+    );
+  }
+}
+
+
+class BookLikeButton extends StatelessWidget {
+  final bool isBookSelected;
+  final VoidCallback? onTap;
+
+  const BookLikeButton({
+    super.key,
+    this.isBookSelected = false,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LikeButton(
+      isLiked: isBookSelected,
+      onTap: onTap != null ? (isLiked) async {
+        onTap!();
+        return !isLiked;
+      } : null,
+      circleColor: const CircleColor(
+        start: Color(0xffa0c4ff),
+        end: Color(0xff0077b6),
+      ),
+      bubblesColor: const BubblesColor(
+        dotPrimaryColor: Colors.blue,
+        dotSecondaryColor: Colors.white,
+      ),
+      likeBuilder: (isLiked) {
+        return Icon(
+          Icons.menu_book,
+          color: isLiked ? Colors.blue : Colors.grey.withOpacity(0.5),
+          size: 30,
+        );
+      },
+    );
+  }
+}

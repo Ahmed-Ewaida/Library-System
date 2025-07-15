@@ -1,0 +1,36 @@
+// abstract class LocalData {
+//   static int? studentId;
+//
+//   static String? refreshToken;
+// }
+import 'package:shared_preferences/shared_preferences.dart';
+
+ abstract class LocalData {
+  static int? studentId;
+  static String? studentName; // 1. أضفنا متغيرًا لاسم المستخدم
+  static String? accessToken;
+  // دالة لحفظ بيانات المستخدم بعد تسجيل الدخول
+  static Future<void> saveUserData({required int id, required String name}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('studentId', id);
+    await prefs.setString('studentName', name); // 2. حفظ اسم المستخدم
+    studentId = id;
+    studentName = name;
+  }
+
+  // دالة لتحميل بيانات المستخدم عند بدء تشغيل التطبيق
+  static Future<void> loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    studentId = prefs.getInt('studentId');
+    studentName = prefs.getString('studentName'); // 3. تحميل اسم المستخدم
+  }
+
+  // دالة لمسح البيانات عند تسجيل الخروج
+  static Future<void> clearUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('studentId');
+    await prefs.remove('studentName'); // 4. مسح اسم المستخدم
+    studentId = null;
+    studentName = null;
+  }
+}

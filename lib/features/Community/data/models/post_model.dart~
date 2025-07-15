@@ -1,0 +1,49 @@
+import 'package:uuid/uuid.dart';
+import 'comment_model.dart';
+
+const uuid = Uuid();
+
+class PostModel {
+  final String id;
+  final String content;
+  final String author;
+  final DateTime timestamp;
+  final List<CommentModel> comments;
+
+  PostModel({
+    required this.content,
+    required this.author,
+    List<CommentModel>? comments,
+    String? id,
+    DateTime? timestamp,
+  })  : id = id ?? uuid.v4(),
+        timestamp = timestamp ?? DateTime.now(),
+        comments = comments ?? [];
+
+  // دالة التحويل إلى JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'content': content,
+      'author': author,
+      'timestamp': timestamp.toIso8601String(),
+      'comments': comments.map((comment) => comment.toJson()).toList(),
+    };
+  }
+
+  // دالة التحويل من JSON
+  factory PostModel.fromJson(Map<String, dynamic> json) {
+    var commentsList = json['comments'] as List? ?? [];
+    List<CommentModel> parsedComments = commentsList
+        .map((c) => CommentModel.fromJson(c as Map<String, dynamic>))
+        .toList();
+
+    return PostModel(
+      id: json['id'],
+      content: json['content'],
+      author: json['author'],
+      timestamp: DateTime.parse(json['timestamp']),
+      comments: parsedComments,
+    );
+  }
+}

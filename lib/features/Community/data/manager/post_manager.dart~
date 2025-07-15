@@ -1,0 +1,54 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/post_model.dart';
+
+class PostManager extends ChangeNotifier {
+  List<Post> _posts = [];
+
+  List<Post> get posts => List.unmodifiable(_posts.reversed); // عرض الأحدث أولاً
+
+  PostManager() {
+    _loadPosts();
+  }
+
+  // إضافة منشور جديد
+  Future<void> addPost(String content, String author) async {
+    final newPost = Post(content: content, author: author);
+    _posts.add(newPost);
+    await _savePosts();
+    notifyListeners();
+  }
+
+  // إضافة تعليق على منشور معين
+  Future<void> addCommentToPost(String postId, String comment) async {
+    try {
+      final postIndex = _posts.indexWhere((p) => p.id == postId);
+      if (postIndex != -1) {
+        _posts[postIndex].comments.add(comment);
+        await _savePosts();
+        notifyListeners();
+      }
+    } catch (e) {
+      // يمكنك التعامل مع الخطأ هنا
+      print("Error adding comment: $e");
+    }
+  }
+
+  // حفظ كل المنشورات في الذاكرة
+  Future<void> _savePosts() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> postsJson = _posts.map((post) => json.encode(post.toJson())).toList();
+    await prefs.setStringList('community_posts', postsJson);
+  }
+
+  // تحميل المنشورات عند بدء التطبيق
+  Future<void> _loadPosts() async {
+    final prefs = await SharedPreferences.getInstance();
+    final postsJson = prefs.getStringList('community_posts');
+    if (postsJson != null) {
+      _posts = postsJson.map((jsonString) => Post.fromJson(json.decode(jsonString))).toList();
+    }
+    notifyListeners();
+  }
+}

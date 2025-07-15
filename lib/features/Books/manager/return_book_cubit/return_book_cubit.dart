@@ -1,0 +1,23 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:t1/features/Books/data/repo/return_book_repo.dart';
+import 'package:t1/features/Books/manager/return_book_cubit/return_book_state.dart';
+
+class ReturnBookCubit extends Cubit<ReturnBookState> {
+  ReturnBookCubit() : super(ReturnBookInitial()) {
+    getReturnBooks();
+  }
+
+  final ReturnBookRepo _repo = ReturnBookRepo.getInstance();
+
+  Future<void> getReturnBooks() async {
+
+    emit(ReturnBookLoading());
+    var result = await _repo.getReturnBooks(
+
+    );
+    result.fold(
+          (failure) => emit(ReturnBookError(message: failure)),
+          (returnBookModel) => emit(ReturnBookSuccess(returnBookModel: returnBookModel)),
+    );
+  }
+}
